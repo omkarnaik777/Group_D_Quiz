@@ -1,14 +1,55 @@
 package com.controller;
 
 import java.sql.CallableStatement;
+import com.validation.Validations;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Scanner;
 
 import com.connectionDAO.ConnectionDB;
 
 public class RegisterStudent {
+	
+	public static void studentLoginAndQuiz() {
+		
+		
+		
+		Scanner sc = new Scanner(System.in);
+		Connection con = null;
+		String userName = "";
+		String password = "";
+		ResultSet rs = null;
+		String quizYN = "N";
+		try {
+			con = ConnectionDB.getConnection();
+			
+			System.out.println("Enter User Name--");
+			userName = sc.next();
+			System.out.println("Enter Password");
+			password = sc.next();
+			String sql = "select * from student where username = ? and password = ?";
+			PreparedStatement pstmt = con.prepareStatement(sql);
+			pstmt.setString(1, userName);
+			pstmt.setString(2, password);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				System.out.println("Login Successfull...!!");
+				System.out.println("Do you want to Attempt Quiz ? (Y/N)");
+				quizYN = sc.next();
+			}
+			
+			if(quizYN.charAt(0)=='Y' || quizYN.charAt(0)=='y') {
+				QuizMaster.startQuiz();
+			}
+			
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public static void registerStudent() {
 		
@@ -32,8 +73,19 @@ public class RegisterStudent {
 			student.setPassword(sc.next());
 			System.out.println("Enter City");
 			student.setCity(sc.next());
-			System.out.println("Enter Email ID");
-			student.setEmail_id(sc.next());
+			
+			String email;
+	        while (true) {
+	            System.out.print("Enter Email: ");
+	            email = sc.nextLine();
+	            if (Validations.isValidEmail(email)) {
+	                student.setEmail_id(email);
+	                break;
+	            } 
+	            else {
+	                System.out.println("Invalid Email! Please enter again.");
+	            }
+	        }
 			System.out.println("Enter Mobile Number");
 			student.setMobile_no(sc.next());
 			

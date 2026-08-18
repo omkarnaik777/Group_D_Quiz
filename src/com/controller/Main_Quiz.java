@@ -21,7 +21,8 @@ public class Main_Quiz {
 		            switch (choice) {
 		                case 1 : RegisterStudent.registerStudent(); 
 		                		 break;//registerStudent();
-		                case 2 : break; //studentLoginAndQuiz();
+		                case 2 : RegisterStudent.studentLoginAndQuiz();
+		                		 break; //studentLoginAndQuiz();
 		                case 3 : break;
 		                case 4 : break;
 		                case 5 : break;
