@@ -23,6 +23,7 @@ public class RegisterStudent {
 		String password = "";
 		ResultSet rs = null;
 		String quizYN = "N";
+		int id = 0 ;
 		try {
 			con = ConnectionDB.getConnection();
 			
@@ -38,12 +39,16 @@ public class RegisterStudent {
 			
 			if(rs.next()) {
 				System.out.println("Login Successfull...!!");
+				id = rs.getInt(1);
 				System.out.println("Do you want to Attempt Quiz ? (Y/N)");
 				quizYN = sc.next();
 			}
+			else {
+				System.out.println("Invalid Login Credentials...!!");
+			}
 			
-			if(quizYN.charAt(0)=='Y' || quizYN.charAt(0)=='y') {
-				QuizMaster.startQuiz();
+			if(!isQuizAlreadyAttempted(id) && (quizYN.charAt(0)=='Y' || quizYN.charAt(0)=='y')) {
+				QuizMaster.startQuiz(id);
 			}
 			
 		} catch (ClassNotFoundException | SQLException e) {
@@ -59,10 +64,19 @@ public class RegisterStudent {
 		String result = "";
 		
 		try {
-			
+			int roll_no = 0;
 			System.out.println("-----Student Registration Form-------");
 			System.out.println("Enter Roll Number");
-			student.setRoll_no(sc.nextInt());
+
+			while (!sc.hasNextInt()) {
+			    System.out.println("Invalid input! Please enter numbers only.");
+			    sc.next();
+			}
+
+			roll_no = sc.nextInt();
+
+			System.out.println("Roll Number: " + roll_no);
+			student.setRoll_no(roll_no);
 			System.out.println("Enter First Name");
 			student.setFirst_name(sc.next());
 			System.out.println("Enter Last Name");
@@ -75,6 +89,7 @@ public class RegisterStudent {
 			student.setCity(sc.next());
 			
 			String email;
+			sc.nextLine();
 	        while (true) {
 	            System.out.print("Enter Email: ");
 	            email = sc.nextLine();
@@ -112,6 +127,71 @@ public class RegisterStudent {
 		finally {
 			
 		}
+	}
+	
+	public static void viewMyScore() {
+
+	    String sql = "SELECT total_score, grade FROM score WHERE student_id = ?";
+	    int studentId=0;
+	    Scanner sc = new Scanner(System.in);
+	    
+	    try {
+	    	
+	    	System.out.println("Enter Valid student ID :");
+	    	studentId = sc.nextInt();
+	    	
+	        Connection con = ConnectionDB.getConnection();
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ps.setInt(1, studentId);
+	        ResultSet rs = ps.executeQuery();
+
+	        System.out.println("\n=================================");
+	        System.out.println("           MY SCORE");
+	        System.out.println("=================================");
+
+	        if (rs.next()) {
+
+	            System.out.println("Student ID : " + studentId);
+	            System.out.println("Score      : " + rs.getInt("total_score"));
+	            System.out.println("Grade      : " + rs.getString("grade"));
+
+	        } else {
+
+	            System.out.println("No score available/student ID not found");
+
+	        }
+
+	        rs.close();
+	        ps.close();
+	        con.close();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	}
+	
+	public static boolean isQuizAlreadyAttempted(int studentId) {
+
+	    String sql = "SELECT student_id FROM score WHERE student_id = ?";
+
+	    try {
+
+	        Connection con = ConnectionDB.getConnection();
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ps.setInt(1, studentId);
+	        ResultSet rs = ps.executeQuery();
+	        boolean exists = rs.next();
+	        rs.close();
+	        ps.close();
+	        con.close();
+
+	        return exists;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
 	}
 		
 }
